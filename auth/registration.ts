@@ -57,8 +57,8 @@ router.post("/r", (req, res) => {
       }
       // REGISTER USER
       utils.db.query(
-        "INSERT INTO users (name, email, passwd) VALUES (?, ? ,?)",
-        [data.name, data.email, hash]
+        "INSERT INTO users (name, passwd, badges, perms, rdate, email) VALUES (?, ?, null, 1, UNIX_TIMESTAMP(), ?)",
+        [data.name, hash, data.email]
       );
       res.status(200).json({
         status: "success",

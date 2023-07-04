@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import db from "./db";
 
 // AuthMid
-import authMid from "../auth/middleware";
+import authMid from "../auth/authMiddleware";
 
 const utils = {
   colors,

@@ -11,13 +11,11 @@ import utils from "./services/utils";
 
 // import routes
 // - AUTH
-import authRoutes from "./auth/auth";
+import authRoutes from "./auth/authRoutes";
 app.use("/auth", authRoutes);
-
-// protected route
-app.get("/", utils.authMid, (req, res) => {
-  res.send("ACCESS GRANTED")
-})
+// - USER ROUTES
+import userRoutes from "./routes/user/userRoutes"
+app.use("/u", utils.authMid, userRoutes);
 
 app.listen("8080", () => {
   console.log(

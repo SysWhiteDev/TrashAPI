@@ -8,6 +8,7 @@ const AuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
       status: "error",
       message: "NO_TOKEN",
     });
+    return
   }
 
   utils.jwt.verify(

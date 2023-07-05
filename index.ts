@@ -16,6 +16,9 @@ app.use("/auth", authRoutes);
 // - USER ROUTES
 import userRoutes from "./routes/user/userRoutes"
 app.use("/u", utils.authMid, userRoutes);
+// - REGISTER RECYCLE ROUTES
+import registerRecycleRoutes from "./routes/registerRecycle/registerRecycleRoutes";
+app.use("/r", utils.authMid, registerRecycleRoutes)
 
 app.listen("8080", () => {
   console.log(

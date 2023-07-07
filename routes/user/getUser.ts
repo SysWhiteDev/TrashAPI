@@ -27,22 +27,11 @@ getUser.get("/:id", (req: Request, res: Response) => {
           return;
         }
 
-        // get friend data
-        const decodedUser = utils.jwt.decode(req.headers.auth as string) as {
-          userid?: string;
-        };
-
-        const userid = decodedUser.userid;
-        const targetid = id;
-
-        let uservalue = 0;
-        let targetvalue = 0;
-
-        // get user value
+        // get stats
         utils.db.query(
-          "SELECT * FROM user_relations WHERE userid = ? AND type = 1",
-          [userid],
-          (err, userdata) => {
+          "SELECT userid, qta, type FROM user_recycles WHERE userid = ?",
+          [id],
+          (err, stats) => {
             if (err) {
               res.status(500).json({
                 status: "error",
@@ -50,13 +39,51 @@ getUser.get("/:id", (req: Request, res: Response) => {
               });
               return;
             }
-            if (userdata.length != 0) {
-              uservalue = 1;
+            const statsObj = {
+              unit: "g",
+              paper: {
+                value: 0,
+                co2value: 0,
+              },
+              plastic: {
+                value: 0,
+                co2value: 0,
+              },
+            };
+
+            for (const stat of stats) {
+              // calculate total of type 0 (paper)
+              if (stat.type == 0) {
+                statsObj.paper.value += stat.qta;
+              } else if (stat.type == 1) {
+                statsObj.plastic.value += stat.qta;
+              }
             }
-            // get target value
+
+            // calculate c02values
+            const paperMultiplier = Number(process.env.PAPER_MULTIPLIER);
+            const plasticMultiplier = Number(process.env.PLASTIC_MULTIPLIER);
+
+            statsObj.paper.co2value = statsObj.paper.value * paperMultiplier;
+            statsObj.plastic.co2value = statsObj.plastic.value * plasticMultiplier;
+
+            // get friend data
+            const decodedUser = utils.jwt.decode(
+              req.headers.auth as string
+            ) as {
+              userid?: string;
+            };
+
+            const userid = decodedUser.userid;
+            const targetid = id;
+
+            let uservalue = 0;
+            let targetvalue = 0;
+
+            // get user value
             utils.db.query(
               "SELECT * FROM user_relations WHERE userid = ? AND type = 1",
-              [targetid],
+              [userid],
               (err, userdata) => {
                 if (err) {
                   res.status(500).json({
@@ -66,18 +93,36 @@ getUser.get("/:id", (req: Request, res: Response) => {
                   return;
                 }
                 if (userdata.length != 0) {
-                  targetvalue = 1;
+                  uservalue = 1;
                 }
+                // get target value
+                utils.db.query(
+                  "SELECT * FROM user_relations WHERE userid = ? AND type = 1",
+                  [targetid],
+                  (err, userdata) => {
+                    if (err) {
+                      res.status(500).json({
+                        status: "error",
+                        message: "UNK",
+                      });
+                      return;
+                    }
+                    if (userdata.length != 0) {
+                      targetvalue = 1;
+                    }
 
-                // give response
-                res.status(200).json({
-                  ...row[0],
-                  friend:
-                    friendPossibleValues[
-                      `${uservalue}${targetvalue}` as keyof typeof friendPossibleValues
-                    ],
-                });
-                return;
+                    // give response
+                    res.status(200).json({
+                      ...row[0],
+                      stats: statsObj,
+                      friend:
+                        friendPossibleValues[
+                          `${uservalue}${targetvalue}` as keyof typeof friendPossibleValues
+                        ],
+                    });
+                    return;
+                  }
+                );
               }
             );
           }

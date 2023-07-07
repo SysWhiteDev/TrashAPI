@@ -5,6 +5,8 @@ const registerRecycleRoutes: Router = Router();
 // - 0: paper
 // - 1: plastic
 
+// unit: grams
+
 import addRecycle from "./addRecycle";
 registerRecycleRoutes.use(addRecycle);
 

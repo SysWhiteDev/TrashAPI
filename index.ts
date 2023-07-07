@@ -16,9 +16,12 @@ app.use("/auth", authRoutes);
 // - USER ROUTES
 import userRoutes from "./routes/user/userRoutes"
 app.use("/u", utils.authMid, userRoutes);
-// - REGISTER RECYCLE ROUTES
+// - RECYCLE ROUTES
 import registerRecycleRoutes from "./routes/registerRecycle/registerRecycleRoutes";
-app.use("/r", utils.authMid, registerRecycleRoutes)
+app.use("/r", utils.authMid, registerRecycleRoutes);
+// - LB ROUTES
+import lbRoutes from "./routes/leaderboards/leaderboardRoutes";
+app.use("/lb", utils.authMid, lbRoutes);
 
 app.listen("8080", () => {
   console.log(
